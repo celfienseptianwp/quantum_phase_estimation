@@ -1,0 +1,3 @@
+## Quantum Phase Estimation (QPE)
+
+Quantum Phase Estimation (QPE) is a fundamental quantum algorithm used to estimate the eigenphase \(\theta\) of a unitary operator \(U\), where \(U|\psi\rangle = e^{2\pi i \theta}|\psi\rangle\). This algorithm plays a central role in many quantum computing applications, including Hamiltonian simulation, ground-state energy estimation, Shor’s algorithm, quantum linear systems, and spectral-based topological quantum algorithms. QPE exploits quantum interference through controlled-unitary operations and the Quantum Fourier Transform (QFT) to efficiently extract phase information.
