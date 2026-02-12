@@ -1,4 +1,6 @@
 import numpy as np
+from math import log2
+from qiskit.circuit.library import UnitaryGate
 
 # ===========================
 # Quantum Fourier Transform
@@ -41,20 +43,38 @@ def IQFT(quantum_circuit, n_control):
 #=================================
 # Quantum Phase Estimation (QPE)
 #=================================
-def QuantumPhaseEstimation(quantum_circuit, unitary_matrix, n_control, n_target):
+def QuantumPhaseEstimation(quantum_circuit, unitary_matrix, n_control):
+    quantum_circuit.barrier()
+
+    # Determine number of target qubit
+    if isinstance(unitary_matrix, UnitaryGate):
+        dim = unitary_matrix.num_qubits
+        n_target = dim
+        U_gate = unitary_matrix
+    else:
+        N = unitary_matrix.shape[0]
+        n_target = int(log2(N))
+        if 2**n_target != N:
+            raise ValueError("Ukuran operator uniter harus 2^n × 2^n")
+        U_gate = UnitaryGate(unitary_matrix)
+
     total_qubit = n_control + n_target
 
     # Hadamard for control qubit
-    for order in range(n_control):
-        quantum_circuit.h(order)
-    
-    # Controlled-U for target qubit
-    controlled_U = unitary_matrix.control(1)
-    for order in range(n_control):
-        for _ in range(2**order):
-            quantum_circuit.append(controlled_U, [order, total_qubit - 1])
+    for q in range(n_control):
+        quantum_circuit.h(q)
 
-    # Apply the IQFT
+    # Controlled-U^(2^k)
+    target_qubits = list(range(n_control, total_qubit))
+
+    for k in range(n_control):
+        controlled_U = U_gate.power(2**k).control(1)
+        quantum_circuit.append(
+            controlled_U,
+            [k] + target_qubits
+        )
+
+    # Inverse QFT
     IQFT(quantum_circuit=quantum_circuit, n_control=n_control)
     quantum_circuit.barrier()
 
